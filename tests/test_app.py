@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
-from app import app, tasks  # <-- import tasks
+from app import app, add_task, tasks  # add add_task to the import
 
 @pytest.fixture
 def client():
@@ -26,3 +26,12 @@ def test_delete_task(client):
     client.post('/add', data={'task': 'Task to Delete'}, follow_redirects=True)
     response = client.get('/delete/0', follow_redirects=True)
     assert b'Task to Delete' not in response.data
+
+def test_add_task_function():
+    tasks.clear()
+    result = add_task("Unit Test Task")
+    assert result is True
+    assert "Unit Test Task" in tasks
+
+    result = add_task("")
+    assert result is False

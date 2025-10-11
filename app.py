@@ -20,5 +20,11 @@ def delete(task_id):
         tasks.pop(task_id)
     return redirect(url_for('index'))
 
+def add_task(task):
+    if task:
+        tasks.append(task)
+        return True
+    return False
+
 if __name__ == '__main__':
     app.run(debug=True)
