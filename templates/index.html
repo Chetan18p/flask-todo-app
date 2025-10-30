@@ -7,18 +7,83 @@
 <body>
     <div class="container">
         <h1>To-Do List</h1>
-        <form action="/add" method="post">
+
+        <form action="/add" method="post" class="add-form">
             <input type="text" name="task" required placeholder="Enter a new task...">
             <input type="submit" value="Add">
         </form>
+
+        <div class="controls">
+            <div class="count">Total: {{ tasks|length }}</div>
+
+            <div class="actions">
+                <!-- Mark Completed button submits the pending tasks form (uses form="complete-form") -->
+                <button form="complete-form" type="submit" class="complete-btn">Mark Completed</button>
+
+                <!-- Clear Pending stays a form so it can confirm on submit -->
+                <form action="/clear" method="post" onsubmit="return confirm('Clear all pending tasks?')">
+                    <button type="submit" class="clear-btn">Clear Pending</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pending tasks: selection form -->
+        <h2>Pending Tasks</h2>
+        <form action="/complete" method="post" id="complete-form">
+            <!-- <button type="submit" class="complete-btn">Mark Completed</button> -->
+            <ul>
+                {% set pending_tasks = tasks | selectattr('done', 'equalto', False) | list %}
+                {% if pending_tasks %}
+                    {% for task in tasks %}
+                        {% if not task['done'] %}
+                        <li>
+                            <div class="task-left">
+                                <input type="checkbox" name="selected" value="{{ loop.index0 }}" class="select-checkbox">
+                                <div class="task-main">
+                                    <span class="task-text">{{ task['text'] }}</span>
+                                    <div class="timestamp">Created: {{ task.get('created_at', 'N/A') }}</div>
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                <a class="delete" href="/delete/{{ loop.index0 }}">Delete</a>
+                            </div>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <li class="empty">No pending tasks.</li>
+                {% endif %}
+            </ul>
+        </form>
+
+
+        <!-- Completed tasks -->
+        <h2>Completed Tasks</h2>
         <ul>
-            {% for task in tasks %}
-                <li>
-                    {{ task }}
-                    <a href="/delete/{{ loop.index0 }}">Delete</a>
-                </li>
-            {% endfor %}
+            {% set completed_tasks = tasks | selectattr('done', 'equalto', True) | list %}
+            {% if completed_tasks %}
+                {% for task in tasks %}
+                    {% if task['done'] %}
+                    <li class="done-item">
+                        <div class="task-left">
+                            <div class="task-main">
+                                <span class="task-text done">{{ task['text'] }}</span>
+                                <div class="timestamp">Created: {{ task.get('created_at', 'N/A') }}</div>
+                                <div class="timestamp">Completed: {{ task.get('completed_at', 'N/A') }}</div>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <a class="delete" href="/delete/{{ loop.index0 }}">Delete</a>
+                        </div>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <li class="empty">No completed tasks.</li>
+            {% endif %}
         </ul>
+
+
     </div>
 </body>
 </html>
